@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GamePad input demo</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    .not-connected {
+      color: red;
+    }
+
+    .connected {
+      color: green;
+    }
+
+    div:has(canvas) {
+      width: 100%;
+      height: 80%;
+      overflow: hidden;
+    }
+
+    div canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <div>Status: <span class="not-connected">Not connected</span></div>
+  <div>
+    <canvas></canvas>
+  </div>
+  <script>
+    const statusSpan = document.querySelector('.not-connected')
+    const canvas = document.querySelector('canvas')
+    const ctx = canvas.getContext('2d')
+    let gamepad
+    let mainloopInterval
+
+    const container = canvas.parentElement
+    canvas.width = container.clientWidth
+    canvas.height = container.clientHeight
+    window.addEventListener('resize', () => {
+      canvas.width = container.clientWidth
+      canvas.height = container.clientHeight
+    });
+
+    const player = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      dx: 0, dy: 0
+    }
+    const playerSpeed = 1.5
+    const playerDiameter = 50
+    const friction = 0.9
+    const frictionDeadzone = 0.01
+
+    const arrowLength = 100
+
+    window.addEventListener('gamepadconnected', (e) => {
+      statusSpan.className = 'connected'
+      statusSpan.textContent = 'Connected: ' + e.gamepad.id
+
+      gamepad = e.gamepad
+      mainloopInterval = setInterval(mainloop, 1000 / 60)
+    });
+
+    window.addEventListener('gamepaddisconnected', (e) => {
+      statusSpan.className = 'not-connected'
+      statusSpan.textContent = 'Not connected'
+
+      gamepad = null
+      clearInterval(mainloopInterval)
+    });
+
+    function mainloop() {
+      if (!gamepad) return
+      gamepad = navigator.getGamepads()[gamepad.index]
+      player.dx = player.dx * friction + playerSpeed * gamepad.axes[0]
+      player.dy = player.dy * friction + playerSpeed * gamepad.axes[1]
+      if (Math.abs(player.dx) < frictionDeadzone) player.dx = 0
+      if (Math.abs(player.dy) < frictionDeadzone) player.dy = 0
+      player.x += player.dx
+      player.y += player.dy
+
+      if (player.x - playerDiameter / 2 < 0) player.x = 0 + playerDiameter / 2
+      if (player.x + playerDiameter / 2 > canvas.width) player.x = canvas.width - playerDiameter / 2
+      if (player.y - playerDiameter / 2 < 0) player.y = 0 + playerDiameter / 2
+      if (player.y + playerDiameter / 2 > canvas.height) player.y = canvas.height - playerDiameter / 2
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.beginPath()
+      ctx.fillStyle = 'green'
+      ctx.arc(player.x, player.y, playerDiameter / 2, 0, Math.PI * 2)
+      ctx.fill()
+
+      const arrowDx = gamepad.axes[0] * arrowLength
+      const arrowDy = gamepad.axes[1] * arrowLength
+
+      ctx.beginPath()
+      ctx.strokeStyle = 'black'
+      ctx.moveTo(player.x, player.y)
+      ctx.lineTo(player.x + arrowDx, player.y + arrowDy)
+      ctx.stroke()
+    }
+  </script>
+</body>
+
+</html>
