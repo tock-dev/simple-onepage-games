@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Konami Code demo</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    .center-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .code-activated {
+      color: white;
+      background-color: black;
+    }
+  </style>
+</head>
+
+<body>
+  <div class='center-content'>
+    <h1 id='text'>Good luck</h1>
+  </div>
+  <script>
+    const keyChain = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA']
+    let keyChainIndex = -1
+
+    const padChain = [12, 12, 13, 13, 14, 15, 14, 15, 1, 0]
+    let padChainIndex = -1
+    let pressedButton = {
+      timestamp: 0,
+      button: -1
+    }
+
+    const body = document.body
+    const label = document.querySelector('#text')
+
+    body.addEventListener('keydown', e => {
+      console.log('Key pressed: ', e.code)
+
+      if (e.code !== keyChain[keyChainIndex + 1]) {
+        keyChainIndex = -1
+        body.classList.remove('code-activated')
+        label.textContent = 'Good luck'
+        return
+      }
+      keyChainIndex++
+      console.log(e.code, 'is at ', keyChainIndex, 'in the konami code chain')
+      if (keyChainIndex === keyChain.length - 1) {
+        body.classList.add('code-activated')
+        label.textContent = 'Konami Code activated!'
+        console.log('Konami Code entered!')
+      }
+    })
+
+    /* let gamepad
+
+    window.addEventListener('gamepadconnected', e => {
+      gamepad = e.gamepad
+    })
+
+    setInterval(() => {
+      if (!gamepad) return
+      gamepad = navigator.getGamepads()[gamepad.index]
+
+      const buttonsPressed = gamepad.buttons.map((b, i) => {
+        if (pressedButton.button === i && Date.now() - pressedButton.timestamp < 500)
+          return
+        pressedButton = {
+          timestamp: Date.now(),
+          button: padChain[padChainIndex]
+        }
+        if (b.pressed) return i
+        return -1
+      }).filter(i => i >= 0)
+      if (buttonsPressed.length > 0) {
+        console.log('Buttons pressed: ', buttonsPressed)
+      }
+
+      if (!buttonsPressed.includes(padChain[padChainIndex + 1])) {
+        padChainIndex = -1
+        body.classList.remove('code-activated')
+        label.textContent = 'Good luck'
+        return
+      }
+      padChainIndex++
+      console.log('Button ', keyChain[padChainIndex], 'is at ', padChainIndex, 'in the konami code chain')
+      if (padChainIndex === padChain.length - 1) {
+        body.classList.add('code-activated')
+        label.textContent = 'Konami Code activated!'
+        console.log('Konami Code entered!')
+      }
+    }, 1000 / 60) */
+  </script>
+</body>
+
+</html>
